@@ -4,12 +4,8 @@
 https://github.com/user-attachments/assets/4d803e4a-9425-4e94-8e22-d3d69fb301be
 
 
-A USB oscilloscope I designed and built around an STM32F407 and an ADC1173. 4-layer board, hand soldered, register-level firmware and a Python app on the PC side. ** the design assumes an 10x probe**
+A USB oscilloscope I designed and built around an STM32F407 and an ADC1173. 4-layer board, hand soldered, register-level firmware and a Python app on the PC side. **the design assumes an 10x probe**
 
-<!-- TODO: board photo -->
-<!-- ![Elizabeth v2](docs/board.jpg) -->
-
-<!-- TODO: demo GIF or video -->
 
 This is the second version. The first board never worked because of footprint and schematic mistakes, so I redid v2 from scratch with hand assembly in mind: bigger pads, one solid ground plane, and analog and digital 3.3 V split on the power layer with a ferrite between them. It still needed a few bodge wires after fabrication. Those are listed in [`hardware/README.md`](hardware/README.md) so the next revision can fix them.
 
@@ -20,7 +16,7 @@ This is the second version. The first board never worked because of footprint an
 | Channels | 1 |
 | ADC | ADC1173, 8 bit, parallel output |
 | Sample rate | Firmware runs at 16.8 MSPS. The hardware timing is designed for 14 MSPS as the worst case |
-| Bandwidth | Front end designed for 6-7 MHz. In practice it drops about 12 dB at 3 MHz, which the host corrects with FFT equalization |
+| Bandwidth | Front end designed for 3Mhz. In practice it drops about 12 dB at 3 MHz, which the host corrects with FFT equalization(in future version) |
 | Input range | ±7 V max (14 Vpp). Smallest signal that shows up reliably is about 0.2 Vpp |
 | Gain | 1x to 8x in integer steps (ADG708 mux) |
 | Capture length | 122,624 samples |
