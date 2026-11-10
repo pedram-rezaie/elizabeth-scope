@@ -25,19 +25,7 @@ This is the second version. The first board never worked because of footprint an
 | MCU | STM32F407VGT6 |
 
 ## How it works
-
-```mermaid
-flowchart LR
-    IN[Input] --> FE[Front end + DAC1 bias]
-    FE --> MUX[ADG708 gain]
-    MUX --> BUF[OPA1656 buffer]
-    BUF --> ADC[ADC1173]
-    TIM[TIM1] -->|ADC clock| ADC
-    ADC -->|PD0-PD7| DMA[DMA2]
-    TIM -->|trigger| DMA
-    DMA --> RAM[SRAM]
-    RAM -->|USB| PC[Python]
-```
+Input → front end + DAC1 bias → ADG708 gain → OPA1656 buffer → ADC1173 → PD0-PD7 → DMA2 (triggered by TIM1) → SRAM → USB → PC
 
 TIM1 channel 1 generates the ADC clock on PA8. Channel 2 of the same timer fires a bit later, once the ADC outputs have settled, and triggers a DMA transfer from `GPIOD->IDR` into RAM. The CPU never touches the samples during a capture. When the buffer is full it goes out over USB.
 
