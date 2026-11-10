@@ -1,5 +1,9 @@
 # Elizabeth v2
 
+
+https://github.com/user-attachments/assets/4d803e4a-9425-4e94-8e22-d3d69fb301be
+
+
 A USB oscilloscope I designed and built around an STM32F407 and an ADC1173. 4-layer board, hand soldered, register-level firmware and a Python app on the PC side. ** the design assumes an 10x probe**
 
 <!-- TODO: board photo -->
