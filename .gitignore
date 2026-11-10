@@ -1,0 +1,34 @@
+# Altium
+History/
+__Previews/
+Project Logs for */
+Project Outputs for */
+*.PcbDoc.htm
+*.SchDocPreview
+*.PcbDocPreview
+*.LOG
+*.Dat
+
+# Firmware build
+build/
+Debug/
+Release/
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

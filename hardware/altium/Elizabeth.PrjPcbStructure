@@ -1,0 +1,5 @@
+Record=TopLevelDocument|FileName=STM32.SchDoc|SheetNumber=1
+Record=SheetSymbol|SourceDocument=STM32.SchDoc|Designator=ADC|SchDesignator=ADC|FileName=ADC.SchDoc|SheetNumber=5|SymbolType=Normal|RawFileName=ADC.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=STM32.SchDoc|Designator=LEVELSHIFT|SchDesignator=LEVELSHIFT|FileName=FrontEnd.SchDoc|SheetNumber=3|SymbolType=Normal|RawFileName=FrontEnd.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=STM32.SchDoc|Designator=PGA|SchDesignator=PGA|FileName=Amplifier.SchDoc|SheetNumber=4|SymbolType=Normal|RawFileName=Amplifier.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=STM32.SchDoc|Designator=POWER|SchDesignator=POWER|FileName=Power.SchDoc|SheetNumber=2|SymbolType=Normal|RawFileName=Power.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 

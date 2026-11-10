@@ -1,0 +1,65 @@
+Elizabeth scope: build, connect and flash over SWD
+===================================================
+
+Needs: xPack arm-none-eabi-gcc and OpenOCD on the PATH, Git Bash on Windows.
+Probe: ST-Link (interface/stlink.cfg). For another probe swap that file:
+  J-Link      -> interface/jlink.cfg
+  CMSIS-DAP   -> interface/cmsis-dap.cfg
+
+Wiring: probe SWDIO -> PA13, SWCLK -> PA14, GND -> GND, VTref/VDD sense -> 3.3V.
+The board is self-powered, so power it before connecting.
+
+
+1. Build
+--------
+cd firmware
+bash build.sh
+(output: firmware.elf)
+
+
+2. Flash in one command
+-----------------------
+Erases, writes, verifies, resets and exits:
+
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program firmware.elf verify reset exit"
+
+
+3. Connect and work by hand
+---------------------------
+Terminal 1, start the OpenOCD server and leave it running:
+
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg
+
+Terminal 2, connect to it:
+
+telnet localhost 4444
+
+Inside telnet:
+
+mdw 0xE0042000                          read DBGMCU_IDCODE, 0x10076413 = F405/407, proves SWD works
+reset halt                              stop the CPU at the reset vector
+flash write_image erase firmware.elf    erase the needed sectors and write
+verify_image firmware.elf               compare flash with the file
+reset run                               restart and run the new firmware
+halt                                    stop the CPU
+resume                                  continue
+reg                                     show the core registers (after halt)
+mdw <address> <count>                   read memory, e.g. mdw 0x40020C10 1 = GPIOD IDR
+mww <address> <value>                   write memory
+exit                                    leave telnet, the server keeps running
+
+Or in one line inside telnet:
+
+program firmware.elf verify reset
+
+
+4. If it won't connect
+----------------------
+Slower SWD clock:
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "adapter speed 1000" -c "program firmware.elf verify reset exit"
+
+Connect under reset (needs the probe's NRST wired to the board's NRST):
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "reset_config srst_only srst_nogate connect_assert_srst" -c "program firmware.elf verify reset exit"
+
+Erase the whole flash (inside telnet, after reset halt):
+stm32f4x mass_erase 0
