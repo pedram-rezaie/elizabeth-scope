@@ -1,3 +1,4 @@
+<img width="2560" height="1439" alt="pcb" src="https://github.com/user-attachments/assets/ada599f1-2d1b-4ad8-84e9-a025ba8ee9dd" />
 # Hardware
 
 4-layer board, designed in Altium, made by JLCPCB and soldered by hand. Everything is on the one board: power, front end, ADC, STM32 and USB.
