@@ -18,7 +18,7 @@
 | `altium/Elizabeth.OutJob` | Gerbers, drill files and schematic PDF in one click |
 | `altium/lib/` | My component library |
 
-No Altium? The schematic PDF and Gerbers are in the release.
+No Altium? The schematic PDF is in docs/ and the Gerbers are in gerbers/.
 
 ## Signal path
 
