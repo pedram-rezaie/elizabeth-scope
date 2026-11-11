@@ -1,67 +1,89 @@
 # Hardware
 
-4-layer board designed in Altium Designer, made by JLCPCB and hand soldered. Power, analog front end, ADC, STM32 and USB are all on one board.
+4-layer board, designed in Altium, made by JLCPCB and soldered by hand. Everything is on the one board: power, front end, ADC, STM32 and USB.
 
 ## Files
 
 | File | |
 |---|---|
 | `altium/Elizabeth.PrjPcb` | Project file, open this one |
-| `altium/STM32.SchDoc` | Top sheet: MCU, crystal, SWD header, buttons, LEDs, BNC input, and the sheet symbols for the other pages |
-| `altium/Power.SchDoc` | Battery inputs, protection, LDOs, USB-C |
+| `altium/STM32.SchDoc` | Top sheet. MCU, crystal, SWD header, buttons, LEDs, BNC input, plus the sheet symbols for the other pages |
+| `altium/Power.SchDoc` | Batteries, protection, LDOs, USB-C |
 | `altium/FrontEnd.SchDoc` | Input buffer, DC bias, anti-aliasing filter |
-| `altium/Amplifier.SchDoc` | Gain stage (resistor ladder, ADG708, OPA356) |
+| `altium/Amplifier.SchDoc` | Gain stage |
 | `altium/ADC.SchDoc` | ADC1173 |
 | `altium/PCB1.PcbDoc` | Layout |
 | `altium/Elizabeth.BomDoc` | BOM |
-| `altium/Elizabeth.OutJob` | Generates Gerbers, drill files and the schematic PDF |
-| `altium/lib/` | My component library (`Elizabeth_Library.LibPkg` with its SchLib and PcbLib) |
+| `altium/Elizabeth.OutJob` | Gerbers, drill files and schematic PDF in one click |
+| `altium/lib/` | My component library |
 
-If you don't have Altium, the schematic PDF and Gerbers are in the release.
+No Altium? The schematic PDF and Gerbers are in the release.
 
 ## Signal path
 
-The front end is designed for a 10x probe. ±7 V at the probe tip is ±0.7 V at the BNC.
+```
+BNC -> input buffer -> + DC bias -> 4th order low-pass -> PGA (1x to 8x) -> ADC1173 -> STM32
+```
 
-**Input.** BNC connector, 1 MΩ to ground with 3.3 pF in parallel, so a standard 10x scope probe can be compensated against it. A TVS diode (GBLC08) and a dual Schottky (BAS70-04) clamping to VBAT+ and VBAT- protect the input.
+### Input
 
-**Buffer and bias.** The OPA1656 runs from the bipolar battery rails, so it can take negative input voltages, and its FET inputs don't load the 1 MΩ input. Its second channel buffers the DC bias from the STM32's DAC1. An OPA356 adds the signal and the bias together, which moves the signal into the 0 to 3.3 V range of everything after it.
+The front end assumes a 10x probe, so ±7 V at the probe tip is ±0.7 V at the BNC. The input itself is 1 MΩ in parallel with 3.3 pF, like a normal scope, so the probe can be compensated. A GBLC08 TVS and a BAS70-04 clamping to the battery rails protect it.
 
-**Anti-aliasing filter.** Two unity-gain Sallen-Key stages (U3 and U2, both OPA356) make a 4th-order Butterworth low-pass with the cutoff at about 2 MHz. The worst case I designed for is 14 MSPS. There, anything at 11 MHz folds back onto 3 MHz, so the filter is designed to give about -57 dB at 11 MHz. One LSB of an 8-bit ADC is -48 dB, so whatever aliases ends up below one LSB.
+### Buffer and DC bias
 
-**Gain.** Eight 47 Ω resistors in series form a divider with taps at 1/8, 2/8 ... 8/8 of the signal. The ADG708 picks one tap, and an OPA356 with a gain of about 8 (1 + 1k/143) brings it back up, so the total gain is 1x to 8x. The mux only drives the high-impedance op-amp input, so its on-resistance doesn't matter. With 200 MHz GBW and a gain of 8, the OPA356 still has about 25 MHz of bandwidth, far above the filter. It runs on 3.3 V, so its output can't leave the ADC's supply range.
+The ADC only sees 0 to 3.3 V, so a negative input has to be lifted up first.
 
-**ADC.** ADC1173 with its references self-biased (VRT tied to VRTS, VRB tied to VRBS). 47 Ω and 47 pF at its input isolate the op-amp from the ADC's sampling kickback. The clock comes from STM32 PA8 through a 22 Ω series resistor to damp ringing, and the 8 data lines go to PD0-PD7.
+The input goes into an OPA1656. It runs from the bipolar battery rails so it doesn't care about negative voltages, and its FET inputs don't load the 1 MΩ. The bias comes from DAC1 on the STM32, through an RC low-pass, and into the OPA1656's second channel.
+
+The two buffered signals meet in a 1k/1k divider. That adds them, but also cuts both in half, so the OPA356 after it has a gain of 2 to undo that. What comes out is the input sitting on top of the bias.
+
+### Anti-aliasing filter
+
+Two Sallen-Key stages, which together make a 4th order Butterworth low-pass at about 2 MHz.
+
+I designed the hardware for 14 MSPS as the worst case. At that rate anything at 11 MHz lands on 3 MHz after sampling, so the filter has to be well down by 11 MHz. It's designed for about -57 dB there. One LSB of an 8-bit ADC is -48 dB, so anything that still aliases is smaller than one LSB.
+
+### PGA
+
+Eight 47 Ω resistors in a row make a divider with taps at 1/8, 2/8 and so on up to 8/8. The ADG708 mux picks a tap, and an OPA356 with a gain of 8 (1 + 1k/143) brings it back up. That gives 1x to 8x.
+
+The mux only feeds an op-amp input, so its on-resistance doesn't matter. At a gain of 8 the OPA356 still has around 25 MHz of bandwidth, way above the filter. And since it runs on 3.3 V, it physically can't push the ADC input outside its supply.
+
+### ADC
+
+ADC1173, references self-biased (VRT to VRTS, VRB to VRBS). There's 47 Ω and 47 pF at its input to keep the op-amp away from the sampling kickback. The clock comes from PA8 through 22 Ω to damp ringing. The data lines go to PD0-PD7.
 
 ## Power
 
-Two batteries on JST XH connectors: BAT1 makes VBAT+, BAT2 makes VBAT-, and the point between them is ground. Both rails get the same 100 µF bulk capacitor, because uneven decoupling on bipolar rails shows up as even-harmonic distortion. Each battery has a PTC fuse and a MOSFET for reverse-polarity protection (P-channel on the positive side, N-channel on the negative side).
+Two batteries on JST XH connectors. BAT1 makes VBAT+, BAT2 makes VBAT-, and ground is the point between them. Each one has a PTC fuse and a MOSFET against reverse polarity. Both rails get the same 100 µF bulk cap. If the decoupling on a bipolar supply is uneven, it shows up as even harmonics in the signal.
 
-Two AP2112K-3.3 LDOs run from VBAT+: LDO1 for the digital 3.3 V and LDO2 for the analog 3.3 V, so switching noise from the STM32 doesn't end up on the analog supply. The ADC's digital supply is taken from the analog rail through 47 Ω. A REF3030 gives the STM32 a 3.0 V VREF+.
+There are two AP2112K-3.3 LDOs on VBAT+. LDO1 feeds the digital side, LDO2 the analog side, so the STM32's switching noise stays off the analog supply. The ADC runs completely from the analog LDO. Its digital supply pins get their own branch, split off through a small resistor and a lot of capacitors. A REF3030 gives the STM32 a 3.0 V VREF+.
 
-USB does not power anything. VBUS only goes through a 22k/47k divider to PA9 so the firmware knows when a host is plugged in.
+USB doesn't power anything. VBUS only goes through a 22k/47k divider to PA9 so the firmware can see when a PC is plugged in.
 
 ## USB
 
-GCT USB4930 USB-C connector, USB 2.0 only. CC1 and CC2 each have their own 5.1k pulldown. A USBLC6-2SC6 protects D+ and D-, which go to the STM32's OTG_FS pins.
+USB-C connector (GCT USB4930), USB 2.0 only. CC1 and CC2 each get their own 5.1k pulldown. A USBLC6-2SC6 does ESD protection on D+ and D-.
+
+The data pair is routed as a 90 Ω differential pair. I got the width and spacing (0.240 mm / 0.127 mm) from Altium's impedance calculator for this stackup.
 
 ## Stackup and grounding
 
-JLC7628, 1.6 mm, 1 oz outer and 0.5 oz inner copper.
+JLC7628, 1.6 mm, 1 oz outside, 0.5 oz inside.
 
 | Layer | |
 |---|---|
 | L1 | Signals and parts |
-| L2 | Solid GND, no splits |
-| L3 | Power pours: analog 3.3 V with the VBAT+ and VBAT- areas on one side, digital 3.3 V on the other |
+| L2 | Solid ground |
+| L3 | Power, cut into four regions: analog 3.3 V, digital 3.3 V, VBAT+ and VBAT- (those two only feed the input buffer) |
 | L4 | Power electronics |
 
-The ground plane is one continuous plane, but the board is still split into an analog and a digital side. The split is done by placement: the analog parts sit over one part of the plane and the digital parts over the other, and no fast digital trace crosses the analog area. Return currents stay under their own traces, so they don't mix, and there's no gap in the plane that a signal would have to go around.
-
-The USB pair on L1 is 0.240 mm wide with 0.127 mm spacing, about 90 Ω on this stackup.
+The ground plane isn't cut anywhere. The analog/digital split is only in the placement: the ADC sits in the middle, analog parts on one side, digital on the other, and no fast digital trace runs through the analog area. Return currents follow their own traces and stay on their own side, and nothing has to detour around a slot in the plane.
 
 ## Design choices
 
-I designed v2 to be easy to hand solder rather than to be perfect on paper. The pads are IPC Level A with extended toes, and the crystal has oversized pads so it can be reflowed with an iron.
+v2 was designed to be easy to solder by hand. The pads are IPC Level A with longer toes, and the crystal has oversized pads so I could reflow it with an iron.
 
-The ADC data lines go to PD0-PD7 because those pins sit next to each other on one side of the LQFP-100. On port E the same bits are spread around the package. The catch is that the order ended up reversed (PD0 = D7), which the host software fixes.
+The ADC goes to PD0-PD7 because those pins are next to each other on one side of the LQFP-100. Port E would have been spread around the chip. The bit order ended up reversed though (PD0 = D7), so the PC software flips it.
+
+
