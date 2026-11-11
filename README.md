@@ -2,7 +2,7 @@
 
 https://github.com/user-attachments/assets/4d803e4a-9425-4e94-8e22-d3d69fb301be
 
-A USB oscilloscope with 2 MHz bandwidth at 16.8 MSPS (up to 3 MHz at 20 MSPS), built around an STM32F407 and an ADC1173. 4-layer board, hand soldered, register-level firmware and a Python app on the PC side. The second DAC doubles as a small function generator.
+A USB oscilloscope with 2 MHz bandwidth at 16.8 MSPS (overclock 20 MSPS), built around an STM32F407 and an ADC1173. 4-layer board, hand soldered, register-level firmware and a Python app on the PC side. The second DAC doubles as a small function generator.
 
 This is the second version. The first board never worked because of footprint and schematic mistakes, so I redid v2 from scratch with hand soldering in mind: bigger pads, one solid ground plane, and separate LDOs for the analog and digital side. It still needed a couple of bodge wires after fabrication. Those mistakes are fixed in the design files now.
 
